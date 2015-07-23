@@ -1,0 +1,16 @@
+[
+{
+  "modid": "JPServerAdmin",
+  "name": "JPServerAdmin",
+  "description": "A mod that provides some utility useful for administration tasks.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["TheJP"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
