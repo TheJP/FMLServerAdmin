@@ -9,6 +9,10 @@ import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent
 import net.minecraft.server.MinecraftServer
 import net.minecraft.entity.player.EntityPlayer
+import cpw.mods.fml.common.eventhandler.SubscribeEvent
+import cpw.mods.fml.common.FMLCommonHandler
+import java.io.PrintStream
+import java.io.FileOutputStream
 
 @Mod(modid = ModId, name = ModName, version = Version,
   modLanguage = "scala", useMetadata = true)
@@ -18,10 +22,14 @@ object JPServerAdmin {
   final val ModName = "JPServerAdmin"
   final val Version = "@VERSION@"
 
-  var log = LogManager.getLogger(ModName)
+  val log = LogManager.getLogger(ModName)
+
+  val PlayersFileName = "players.txt"
 
   @EventHandler
   def init(e: FMLInitializationEvent){
+    //Register join/leave events
+    FMLCommonHandler.instance().bus().register(this)
     log.info("Done with init")
   }
 
@@ -30,14 +38,21 @@ object JPServerAdmin {
    */
   def updatePlayerList = {
     log.info("update") //TODO: remove
+    //Get player names
     val players = MinecraftServer.getServer.worldServers flatMap
-      { _.playerEntities.toArray map { _.asInstanceOf[EntityPlayer] } }
-    log.info(players map { _.getDisplayName } mkString { ", " })
+      { _.playerEntities.toArray map { _.asInstanceOf[EntityPlayer].getDisplayName } }
+    log.info(players mkString { ", " })
+    //Save to the file
+    var writer: PrintStream = null
+    try {
+      writer = new PrintStream(new FileOutputStream(PlayersFileName, false))
+      players foreach { p => writer.println(p) }
+    } finally { if(writer != null){ writer.close } } //(Scala does not support a "resource-try")
   }
 
-  @EventHandler
+  @SubscribeEvent
   def join(e: PlayerLoggedInEvent) = updatePlayerList
 
-  @EventHandler
+  @SubscribeEvent
   def leave(e: PlayerLoggedOutEvent) = updatePlayerList
 }
