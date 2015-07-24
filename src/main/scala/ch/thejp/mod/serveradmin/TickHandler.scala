@@ -17,19 +17,16 @@ object TickHandler {
    */
   val CheckInterval = 20
 
-  var tickCount: Int = 0
+  private var tickCount: Int = 0
 
   /**
    * Checks for marker files and reacts to them.
    */
-  def check = {
-    for((file, command) <- reactions){
-      if(file.isFile){
-        file.delete
-        command()
-      }
+  def check =
+    reactions filter { _._1.isFile } foreach { case (file, command) =>
+      file.delete
+      command()
     }
-  }
 
   @SubscribeEvent
   def tick(e: ServerTickEvent) = {
